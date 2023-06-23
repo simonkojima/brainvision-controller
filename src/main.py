@@ -1,5 +1,16 @@
 import socket
 import control
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--emu', action='store_true')
+args = parser.parse_args()
+
+if args.emu:
+    print("Emulator Mode")
+    rec = control.recorder_emu()
+else:
+    rec = control.ole_recorder()
 
 IPADDR = "127.0.0.1"
 PORT = 49152
@@ -8,8 +19,6 @@ sock_sv = socket.socket(socket.AF_INET)
 sock_sv.settimeout(5)
 sock_sv.bind((IPADDR, PORT))
 sock_sv.listen()
-
-rec = control.ole_recorder()
 
 def recv_client(sock, addr):
     while True:
@@ -26,8 +35,11 @@ def recv_client(sock, addr):
             elif data.startswith("stop_viewing"):
                 rec.stop_viewing()
             elif data.startswith("load_workspace"):
-                workspace = data.split(' ')[1]
-                rec.load_workspace(workspace)
+                try:
+                    workspace = data.split(' ')[1]
+                    rec.load_workspace(workspace)
+                except:
+                    print("Error : workspace could not be pursed.")
             elif data.startswith("start_viewing"):
                 rec.start_viewing()
             elif data.startswith("start_recording"):
@@ -36,8 +48,11 @@ def recv_client(sock, addr):
             elif data.startswith("stop_recording"):
                 rec.stop_recording()
             elif data.startswith("initialize_recorder"):
-                workspace = data.split(' ')[1]
-                rec.initialize_recorder(workspace)
+                try:
+                    workspace = data.split(' ')[1]
+                    rec.initialize_recorder(workspace)
+                except:
+                    print("Error : workspace could not be pursed.")
             else:
                 print("Unknown command '%s' was recieved" %str(data))
 
