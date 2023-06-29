@@ -1,3 +1,4 @@
+import os
 import socket
 import control
 import argparse
@@ -12,13 +13,37 @@ if args.emu:
 else:
     rec = control.ole_recorder()
 
-IPADDR = "127.0.0.1"
+IPADDR = "192.168.11.12"
 PORT = 49152
 
 sock_sv = socket.socket(socket.AF_INET)
 sock_sv.settimeout(5)
 sock_sv.bind((IPADDR, PORT))
 sock_sv.listen()
+
+def mkdir(dir):
+    isExist = os.path.exists(dir)
+    if not isExist:
+        os.makedirs(dir)
+
+def check_file(file_dir):
+    file = os.path.basename(file_dir)
+    base = os.path.dirname(file_dir)
+    try:
+        fname = file.split('.')[0]
+        ext = file.split('.')[1]
+    except:
+        raise ValueError("file should have extension.")
+    if os.path.exists(os.path.join(base, file)):
+        cnt = 2
+        while True:
+            new_fname = "%s_%d" %(fname, cnt)
+            if os.path.exists(os.path.join(base, fname)):
+                cnt += 1
+            else:
+                return os.path.join(base, "%s.%s"%(new_fname, ext))
+    else:
+        return os.path.join(base,file)
 
 def recv_client(sock, addr):
     while True:
@@ -44,6 +69,8 @@ def recv_client(sock, addr):
                 rec.start_viewing()
             elif data.startswith("start_recording"):
                 file = data.split(' ')[1]
+                file = check_file(file)
+                print(file)
                 rec.start_recording(file)
             elif data.startswith("stop_recording"):
                 rec.stop_recording()
@@ -53,6 +80,13 @@ def recv_client(sock, addr):
                     rec.initialize_recorder(workspace)
                 except:
                     print("Error : workspace could not be pursed.")
+            elif data.startswith("mkdir"):
+                try:
+                    dir = data.split(' ')[1]
+                    mkdir(dir)
+                except:
+                    print("dir was not parsed.")
+                    
             else:
                 print("Unknown command '%s' was recieved" %str(data))
 
