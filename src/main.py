@@ -3,6 +3,8 @@ import socket
 import control
 import argparse
 
+import conf
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--emu', action='store_true')
 args = parser.parse_args()
@@ -13,8 +15,10 @@ if args.emu:
 else:
     rec = control.ole_recorder()
 
-IPADDR = "192.168.11.12"
-PORT = 49152
+IPADDR = conf.IPADDR
+PORT = conf.PORT
+print("IP Address: %s"%str(IPADDR))
+print("Port: %s"%str(PORT))
 
 sock_sv = socket.socket(socket.AF_INET)
 sock_sv.settimeout(5)
